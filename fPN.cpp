@@ -125,17 +125,17 @@ void updateW(int m, int n, int r, double *sc_coeff, double *WH, double *X, doubl
 void mainupdate(int m, int n, int r, int maxiter, double maxtime, double *X, double *W, double *H, double *obj, double *time)
 {
     double total = 0, timestart;
-    double *WH = (double *)malloc(sizeof(double)*m*n);
+    double *WH = (double *)malloc(sizeof(double)*m*n); //N row, M col?
     double *col=(double *)malloc(sizeof(double)*n);
     double *row=(double *)malloc(sizeof(double)*m);
     int idx=0, iter=0, id;
     timestart = clock();
-    for ( int j=0 ; j<n ; j++ )
-     for ( int i=0 ; i<m ; i++ )
+    for ( int j=0 ; j<n ; j++ ) //j : row
+     for ( int i=0 ; i<m ; i++ ) // i : col
 		{   // find WH(i,j)
 			WH[idx] = 0;
-			for (int k=0 ; k<r ; k++ )
-				WH[idx] += W[k+i*m]*H[j+k*n];
+			for (int k=0 ; k<r ; k++ ) //confuse?
+				WH[idx] += W[k+i*m]*H[j+k*n]; // size of W and H? i*n? and k*m?
             idx += 1; 
 		}
     // find col(k) 
@@ -143,28 +143,29 @@ void mainupdate(int m, int n, int r, int maxiter, double maxtime, double *X, dou
     {   
         col[j]=sqrt(X[j]);
      for (int i=1; i<m; i++)    
-     {   id=j+i*n;
+     {   id=j+i*n; //traverse col of X?
          if (X[id]>0 && col[j]>0)
               col[j]=std::min(col[j],X[id]);
         
         else if (X[id]==0 && col[j]>0)
               col[j]=sqrt(X[id]);
+      //what is the else condition, we should have else condition to catch all.
                 
      }
-     col[j]=1/col[j];   
+     col[j]=1/col[j];   //if the for loop above cannot assign value to col[j], and its original value is 0-> exception
     } 
     // find row(k) 
     for (int i=0; i<m; i++)
     {   id=i*n;
         row[i]=sqrt(X[id]);
      for (int j=1; j<n; j++)    
-     {   idx=id+j;
+     {   idx=id+j;//traverse row of X
          if (X[idx]>0 && row[i]>0)
               row[i]=std::min(row[i],X[idx]);
         
         else if (X[idx]==0 && row[i]>0)
               row[i]=sqrt(X[idx]);
-                
+        //what is the else condition, we should have else condition to catch all.  
      }
      row[i]=1/row[i];   
     }
@@ -219,7 +220,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
 	plhs[3] = mxCreateDoubleMatrix(1,maxiter,mxREAL);
 	time_sequence = mxGetPr(plhs[3]);
-    
+    //How big is W, X , H?
     mainupdate(m,n, r,maxiter,maxtime,X,W,H,obj_sequence, time_sequence);
     
     plhs[0] = mxCreateDoubleMatrix(m,r,mxREAL);
